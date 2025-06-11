@@ -877,7 +877,7 @@
             "SP-MA-0969-02",
             "sp-ma-0969-02",
             "SP-MA-0874-03",
-            "sp-ma-0974-03",
+            "sp-ma-0874-03",
             "MA-0874-04",
             "ma-0874-04",
             "SP-MA-0970-02",
@@ -970,27 +970,30 @@
         function loadStoredData() {
             // Simulate loading from company database
             const mockData = [
-                {id: 1, mfc: 'HLN01', serialNumber: 'SN-001', removedFrom: 'LR00002240', reasonRemove: 'Defected', date: '2024-01-15'},
-                {id: 2, mfc: 'EMK01', serialNumber: 'SN-002', removedFrom: 'LR00002241', reasonRemove: 'Scrap', date: '2024-01-20'},
+                {id: 1, mfc: 'HLN01', serialNumber: 'SP-MA-0970-02', removedFrom: 'LR00002240', reasonRemove: 'Defected', date: '2024-01-15'},
+                {id: 2, mfc: 'EMK01', serialNumber: 'SP-MA-0873-03', removedFrom: 'LR00002241', reasonRemove: 'Scrap', date: '2024-01-20'},
                 {id: 3, mfc: 'HLN01', serialNumber: 'SP-MA-0969-02', removedFrom: 'LR00002242', reasonRemove: 'Defected', date: '2024-02-01'},
-                {id: 4, mfc: 'BS01', serialNumber: 'SN-004', removedFrom: 'LR00002243', reasonRemove: 'Required For R&D', date: '2024-02-10'},
+                {id: 4, mfc: 'BS01', serialNumber: 'SP-MA-0970-02', removedFrom: 'LR00002243', reasonRemove: 'Required For R&D', date: '2024-02-10'},
                 {id: 5, mfc: 'EMK01', serialNumber: 'MA-0874-04', removedFrom: 'LR00002244', reasonRemove: 'Defected', date: '2024-02-15'}
             ];
             formDatabase = mockData;
         }
 
         // =================================
-        // SERIAL NUMBER CHECKING FUNCTION
+        // PART NUMBER CHECKING FUNCTION
         // =================================
         
-        function checkSerialNumber() {
-            const sn = document.getElementById("serialNumber").value.trim();
+        function checkPartNumber() {
+            const pn = document.getElementById("partNumber").value.trim();
             const extraFields = document.getElementById("extraFields");
             
             // Check if the entered serial number matches any valid serial (case-insensitive)
             const isValidSerial = validSerials.some(validSN => 
                 validSN.toLowerCase() === sn.toLowerCase()
             );
+
+            console.log("Part number entered:", pn);
+            console.log("Is valid serial:", isValidSerial);
             
             if (isValidSerial) {
                 extraFields.style.display = "block";
@@ -1004,18 +1007,18 @@
                 }, 10);
                 
                 // Set required attributes when fields are shown
-                document.getElementById("reason").setAttribute("required", "required");
-                document.getElementById("motorNumbers").setAttribute("required", "required");
+                document.querySelectorAll('input[name="reason"]').forEach(radio => radio.setAttribute("required", "required"));
+                document.querySelectorAll('input[name="motorNumbers"]').forEach(checkbox => checkbox.setAttribute("required", "required"));
             } else {
                 extraFields.style.display = "none";
                 // Clear the special fields when hidden
                 document.querySelectorAll('input[name="reason"]').forEach(radio => radio.checked = false);
                 document.getElementById('reasonDisplay').textContent = '-- Select Reason --';
-                document.getElementById("motorNumbers").selectedIndex = -1;
+                document.querySelectorAll('input[name="motorNumbers"]').forEach(checkbox => checkbox.checked = false);
                 
                 // Remove required attributes when fields are hidden
                 document.querySelectorAll('input[name="reason"]').forEach(radio => radio.removeAttribute("required"));
-                document.getElementById("motorNumbers").removeAttribute("required");
+                document.querySelectorAll('input[name="motorNumbers"]').forEach(checkbox => checkbox.removeAttribute("required"));
             }
         }
 
@@ -1127,6 +1130,12 @@
             setDefaultDate();
             document.getElementById('extraFields').style.display = 'none';
             
+            // Reset dropdown displays
+            document.getElementById('mfcDisplay').textContent = 'Select MFC';
+            document.getElementById('itemTypeDisplay').textContent = 'Select Item Type';
+            document.getElementById('reasonRemoveDisplay').textContent = 'Select Reason';
+            document.getElementById('reasonDisplay').textContent = '-- Select Reason --';
+            
             showMessage('Form saved successfully! Backup sent to Slack channel.', 'success');
         }
 
@@ -1150,6 +1159,7 @@
                     color: '#1976d2',
                     fields: [
                         { title: 'MFC', value: data.mfc, short: true },
+                        { title: 'Part Number', value: data.partNumber || "N/A", short: true },
                         { title: 'Serial Number', value: data.serialNumber || "N/A", short: true },
                         { title: 'Asset SN', value: data.removedFrom, short: true },
                         { title: 'Reason for Remove', value: data.reasonRemove, short: true },
@@ -1240,7 +1250,7 @@
 
         function exportToExcel() {
             // Create CSV content with new fields
-            const headers = ['ID', 'MFC', 'Date', 'Tagged By', 'Item Type', 'Serial Number', 'Asset SN', 'Service Call ID', 'Reason', 'Replacement Reason', 'Motor Numbers', 'Comments'];
+            const headers = ['ID', 'MFC', 'Date', 'Tagged By', 'Item Type', 'Part Number', 'Serial Number', 'Asset SN', 'Service Call ID', 'Reason', 'Replacement Reason', 'Motor Numbers', 'Comments'];
             const csvContent = [
                 headers.join(','),
                 ...formDatabase.map(row => [
@@ -1249,6 +1259,7 @@
                     row.removalDate || row.date || '',
                     row.taggedBy || '',
                     row.itemType || '',
+                    row.partNumber || '',
                     row.serialNumber || '',
                     row.removedFrom || '',
                     row.serviceCallId || '',
