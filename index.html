@@ -682,11 +682,10 @@
                     <input type="text" id="partNumber" name="partNumber" placeholder="Enter part number" oninput="checkPartNumber()">
                 </div>
 
-
                 <!-- SERIAL NUMBER -->
                 <div class="form-group">
                     <label for="serialNumber">Serial Number</label>
-                    <input type="text" id="serialNumber" name="serialNumber" placeholder="Enter serial number">
+                    <input type="text" id="serialNumber" name="serialNumber" placeholder="Enter serial number"  required> 
                 </div>
 
                 <!-- REMOVED FROM (ASSET SN) -->
@@ -724,7 +723,7 @@
             </div>
 
              <!-- SPECIAL SERIAL NUMBER FIELDS -->
-            <div id="extraFields" class="form-group special-fields">
+            <div id="extraFields" class="form-group special-fields hidden">
                 <h3 style="color: #E65100; margin-bottom: 20px;">🔧 Special Asset Configuration</h3>
                 
                 <div style="margin-bottom: 20px;">
@@ -888,6 +887,22 @@
             "ma-0873-04"
         ];
 
+        function setupPartNumberTrigger() {
+            const partNumberInput = document.getElementById("partNumber");
+            const motorSelectDiv = document.getElementById("extraFields");
+
+            partNumberInput.addEventListener("input", function () {
+                const value = partNumberInput.value.trim().toLowerCase();
+                const match = validSerials.includes(value);
+                if (match) {
+                    motorSelectDiv.classList.remove("hidden");
+                } else {
+                    motorSelectDiv.classList.add("hidden");
+                }
+            });
+        }
+
+
         // Initialize application when page loads
         document.addEventListener('DOMContentLoaded', function() {
             loadStoredData();
@@ -895,6 +910,7 @@
             setDefaultDate();
             setupCharacterCounter();
             setupDropdowns();
+            setupPartNumberTrigger();
         });
 
         // =================================
@@ -1434,3 +1450,4 @@
     </script>
 </body>
 </html>
+          
